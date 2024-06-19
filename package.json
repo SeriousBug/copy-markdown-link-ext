@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "vite dev",
     "preview": "PREVIEW=true vite dev",
-    "build:firefox": "tsc && BROWSER=firefox vite build",
-    "build:chrome": "tsc && BROWSER=chrome vite build",
+    "build:firefox": "tsc && BROWSER=firefox VITE_BROWSER_NAME=Firefox vite build",
+    "build:chrome": "tsc && BROWSER=chrome VITE_BROWSER_NAME=Chrome vite build",
+    "build:edge": "tsc && BROWSER=chrome VITE_BROWSER_NAME=Edge vite build",
     "build": "npm run build:firefox && npm run build:chrome",
     "test": "vitest",
     "lint": "eslint src/"
@@ -25,7 +26,8 @@
     "lodash": "^4.17.21",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
-    "vite-plugin-solid": "^2.10.2"
+    "vite-plugin-solid": "^2.10.2",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.1.0",
