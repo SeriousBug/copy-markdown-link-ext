@@ -28,7 +28,7 @@ function Checkbox({
   return (
     <div class="flex flex-row gap-4">
       <input
-        class="appearance-none flex-shrink-0 h-7 w-12 border border-black dark:border-white rounded-5 before:content-[''] before:w-6 before:h-6 before:rounded-5 before:block before:opacity-70 checked:before:opacity-100 before:bg-primary checked:before:translate-x-5 before:transition-all before:duration-200 before:ease-in-out checked:bg-primary-800 dark:checked:bg-primary-200 transition-colors duration-200 ease-in-out"
+        class="appearance-none flex-shrink-0 h-7 w-12 border border-primary-300 dark:border-primary-700 rounded-5 before:content-[''] before:w-6 before:h-6 before:rounded-5 before:block before:opacity-70 checked:before:opacity-100 before:bg-primary checked:before:translate-x-5 before:transition-all before:duration-200 before:ease-in-out checked:bg-primary-800 dark:checked:bg-primary-200 transition-colors duration-200 ease-in-out"
         type="checkbox"
         id={id}
         name={id}
@@ -114,17 +114,63 @@ function Section(props: ParentProps) {
   );
 }
 
-function Description(props: ParentProps) {
+function Description(props: ParentProps<{ class?: string }>) {
   const safeChildren = children(() => props.children);
 
-  return <p class="opacity-80">{safeChildren()}</p>;
+  return <p class={clsx(props.class, "opacity-80")}>{safeChildren()}</p>;
+}
+
+function Select({ label, ...props }: ParentProps<{ label: string }>) {
+  const safeChildren = children(() => props.children);
+
+  return (
+    <fieldset class="flex flex-col gap-2">
+      <legend>{label}</legend>
+      <div class="ml-4 mt-2 flex flex-col gap-1">{safeChildren()}</div>
+    </fieldset>
+  );
+}
+
+function SelectChoice({
+  group,
+  id,
+  children,
+}: {
+  group: string;
+  id: string;
+  children: string;
+}) {
+  return (
+    <div class="flex flex-row gap-4">
+      <input
+        class="appearance-none border border-primary-300 dark:border-primary-700 w-6 h-6 flex-none rounded-full checked:bg-primary-500 transition-all duration-200 ease-in-out"
+        name={group}
+        type="radio"
+        id={id}
+      />
+      <label for={id}>{children}</label>
+    </div>
+  );
+}
+
+function Highlight({ children }: { children: string }) {
+  return (
+    <span class="text-highlight-300 dark:text-highlight-700">{children}</span>
+  );
+}
+
+function Pre(props: ParentProps) {
+  return (
+    <pre class="inline break-words whitespace-pre-wrap">{props.children}</pre>
+  );
 }
 
 function Page() {
   return (
-    <div class="bg-white text-black dark:bg-black dark:text-white p-6 flex flex-col items-center justify-center min-h-screen">
-      <div class="flex flex-col items-stretch max-w-[520px] m-4 gap-6">
+    <div class="bg-white text-base text-black dark:bg-black dark:text-white p-6 flex flex-col items-center justify-center min-h-screen">
+      <div class="flex flex-col items-stretch max-w-[48rem] m-4 gap-6">
         <Heading size="2xl">Copy Markdown Link Options</Heading>
+
         <Section>
           <Heading>Right Click Context Menu</Heading>
           <OptionCheckbox key="enable-link">
@@ -137,77 +183,84 @@ function Page() {
             Show copy page when an empty spot on a page is right clicked
           </OptionCheckbox>
           <Description>
-            If more than one of these options are enabled, the buttons will be
-            collapsed under a single menu option if multiple options match what
-            you are right clicking. For example if something is both an image
-            and a link, you'll get both
+            If more than one context menu item is applicable, all of them will
+            be put under a submenu. This is a{" "}
+            {import.meta.env.BROWSER_NAME ?? "browser"} feature that can't be
+            disabled.
           </Description>
         </Section>
+
         <Section>
-          <h2>Image Processing</h2>
-          <div>
-            <label for="images">Should images be wrapped in a link?</label>
-            <select id="images">
-              <option value="alt">Do not wrap images in a link</option>
-              <option value="alt-fallback-title">
-                Images should link to the page they are on
-              </option>
-              <option value="alt-fallback-filename">
-                Images should link to the image file
-              </option>
-            </select>
-          </div>
-          <div>
-            <label for="images">The image alt text should use</label>
-            <select id="images">
-              <option value="alt">
-                The alt text of the actual image, if available. Otherwise blank.
-              </option>
-              <option value="alt-fallback-title">
-                The alt text of the actual image, if available. Otherwise the
-                page title.
-              </option>
-              <option value="alt-fallback-filename">
-                The alt text of the actual image, if available. Otherwise the
-                file name.
-              </option>
-              <option value="title">
-                The title of the page the image is on.
-              </option>
-            </select>
-          </div>
+          <Heading>Images</Heading>
+          <Select label="Should images be wrapped in a link?">
+            <Description class="mb-2">
+              Example:{" "}
+              <Pre>
+                <Highlight>[</Highlight>
+                ![](https://example.com/image.png)
+                <Highlight>](https://example.com/page)</Highlight>
+              </Pre>
+            </Description>
+            <SelectChoice group="f" id={"f"}>
+              Do not wrap images in a link
+            </SelectChoice>
+            <SelectChoice group="f" id={"q"}>
+              Wrap images in a link to the page
+            </SelectChoice>
+            <SelectChoice group="f" id={"p"}>
+              Wrap images in a link to the image file
+            </SelectChoice>
+          </Select>
+          <Select label="What to put as the alt text of the image?">
+            <Description class="mb-2">
+              Alt text is{" "}
+              <Pre>
+                ![
+                <Highlight>this</Highlight>
+                ](...)
+              </Pre>{" "}
+              part of the link.
+            </Description>
+            <SelectChoice group="images" id="none">
+              No alt text.
+            </SelectChoice>
+            <SelectChoice group="images" id="alt">
+              The alt text of the actual image, if available. Otherwise blank.
+            </SelectChoice>
+            <SelectChoice group="images" id="alt-fallback-title">
+              The alt text of the actual image, if available. Otherwise the page
+              title.
+            </SelectChoice>
+            <SelectChoice group="images" id="alt-fallback-filename">
+              The alt text of the actual image, if available. Otherwise the file
+              name.
+            </SelectChoice>
+            <SelectChoice group="images" id="title">
+              The title of the page the image is on.
+            </SelectChoice>
+          </Select>
         </Section>
-        <Section>
-          <h2>Page Processing</h2>
-          <div>
-            <label>Custom Format</label>
-            <textarea></textarea>
-          </div>
-        </Section>
-        <Section>
-          <h2>Link Processing</h2>
-        </Section>
+
         <Section>
           <Heading>Privacy</Heading>
           <OptionCheckbox key="privacy-remove-tracking">
             Remove tracking parameters from URLs
           </OptionCheckbox>
         </Section>
+
         <Section>
-          <h2>Action Button</h2>
-          <div>
-            <label for="action-button">
-              What to do when the browser action button is clicked
-            </label>
-            <select id="action-button">
-              <option value="popup">
-                Open the editable pop-up with current page link
-              </option>
-              <option value="copy">
-                Copy the current page link to the clipboard
-              </option>
-            </select>
-          </div>
+          <Heading>Browser Action Button</Heading>
+          <Description>
+            The action button is the extension icon in the top navigation bar.
+          </Description>
+          <Select label="What should clicking the action button do?">
+            <SelectChoice group="action" id="popup">
+              Show a popup with the markdown link
+            </SelectChoice>
+            <SelectChoice group="action" id="copy">
+              Copy the markdown link to clipboard
+            </SelectChoice>
+          </Select>
         </Section>
       </div>
     </div>

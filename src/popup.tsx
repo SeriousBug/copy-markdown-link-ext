@@ -6,12 +6,12 @@ function Page() {
   return (
     <div class="bg-white text-black dark:bg-black dark:text-white p-6 w-[600px] flex flex-col items-center justify-center">
       <input
-        class="border-black dark:border-white bg-transparent text-inherit p-1 mb-8 border rounded outline-none focus:shadow-lg focus:shadow-blue-500 transition-all duration-300 w-full"
+        class="border-black dark:border-white bg-transparent text-inherit p-1 mb-8 border rounded outline-none focus:shadow-lg focus:shadow-primary transition-all duration-300 w-full"
         type="text"
         id="copy-text"
       />
       <button
-        class="border-none bg-blue-300 dark:bg-blue-700 text-inherit transition-all duration-100 w-24 px-2 py-4 rounded"
+        class="border-none bg-primary-300 dark:bg-primary-700 text-inherit transition-all duration-100 w-24 px-2 py-4 rounded"
         id="copy-button"
       >
         Copy

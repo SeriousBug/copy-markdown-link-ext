@@ -6,7 +6,11 @@ export type Option = {
   "enable-image": boolean;
   "enable-page": boolean;
   "image-link-target": "no-link" | "link-to-page" | "link-to-image";
-  "image-alt-target": "alt" | "alt-fallback-title" | "alt-fallback-filename";
+  "image-alt-target":
+    | "none"
+    | "alt"
+    | "alt-fallback-title"
+    | "alt-fallback-filename";
   "privacy-remove-tracking": boolean;
   "action-button": "popup" | "copy";
 };
@@ -19,8 +23,8 @@ const Option: ZodObject<ZodifiedOptions> = z.object({
   "enable-image": z.boolean(),
   "enable-page": z.boolean(),
   "image-link-target": z.enum(["no-link", "link-to-page", "link-to-image"]),
-
   "image-alt-target": z.enum([
+    "none",
     "alt",
     "alt-fallback-title",
     "alt-fallback-filename",
