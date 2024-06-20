@@ -317,6 +317,8 @@ function Page() {
             </OptionSelectChoice>
           </Select>
         </Section>
+
+        <Description>Changes are saved automatically.</Description>
       </div>
     </div>
   );
