@@ -10,7 +10,8 @@ export type Option = {
     | "none"
     | "alt"
     | "alt-fallback-title"
-    | "alt-fallback-filename";
+    | "alt-fallback-filename"
+    | "title";
   "privacy-remove-tracking": boolean;
   "action-button": "popup" | "copy";
 };

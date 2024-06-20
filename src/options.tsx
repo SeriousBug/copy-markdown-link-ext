@@ -53,6 +53,12 @@ type OptionBoolean = Pick<
     [K in keyof Option]: Option[K] extends boolean ? K : never;
   }[keyof Option]
 >;
+type OptionEnum = Pick<
+  Option,
+  {
+    [K in keyof Option]: Option[K] extends string ? K : never;
+  }[keyof Option]
+>;
 
 function OptionCheckbox({
   key,
@@ -131,14 +137,18 @@ function Select({ label, ...props }: ParentProps<{ label: string }>) {
   );
 }
 
-function SelectChoice({
+function SelectChoice<I extends string>({
   group,
   id,
   children,
+  checked,
+  onChecked,
 }: {
   group: string;
-  id: string;
+  id: I;
   children: string;
+  checked?: boolean;
+  onChecked?: (id: I) => void;
 }) {
   return (
     <div class="flex flex-row gap-4">
@@ -147,9 +157,45 @@ function SelectChoice({
         name={group}
         type="radio"
         id={id}
+        checked={checked}
+        onChange={(e) => {
+          e.target.checked && onChecked?.(id);
+        }}
       />
       <label for={id}>{children}</label>
     </div>
+  );
+}
+
+function OptionSelectChoice<K extends keyof OptionEnum>({
+  group,
+  children,
+  choice,
+}: {
+  group: K;
+  choice: Option[K];
+  children: string;
+}) {
+  const onChecked = (value: Option[K]) => saveOption(group, value);
+  const [defaultValue] = createResource(group, getOption);
+
+  return (
+    <Switch>
+      <Match when={defaultValue.loading}>Loading...</Match>
+      <Match when={defaultValue.error}>
+        Error: {defaultValue.error.message}
+      </Match>
+      <Match when={defaultValue() !== undefined}>
+        <SelectChoice
+          group={group}
+          id={choice}
+          onChecked={onChecked}
+          checked={choice === defaultValue()}
+        >
+          {children}
+        </SelectChoice>
+      </Match>
+    </Switch>
   );
 }
 
@@ -201,15 +247,18 @@ function Page() {
                 <Highlight>](https://example.com/page)</Highlight>
               </Pre>
             </Description>
-            <SelectChoice group="f" id={"f"}>
+            <OptionSelectChoice
+              group="image-link-target"
+              choice="link-to-image"
+            >
               Do not wrap images in a link
-            </SelectChoice>
-            <SelectChoice group="f" id={"q"}>
+            </OptionSelectChoice>
+            <OptionSelectChoice group="image-link-target" choice="link-to-page">
               Wrap images in a link to the page
-            </SelectChoice>
-            <SelectChoice group="f" id={"p"}>
+            </OptionSelectChoice>
+            <OptionSelectChoice group="image-link-target" choice="no-link">
               Wrap images in a link to the image file
-            </SelectChoice>
+            </OptionSelectChoice>
           </Select>
           <Select label="What to put as the alt text of the image?">
             <Description class="mb-2">
@@ -221,20 +270,26 @@ function Page() {
               </Pre>{" "}
               part of the link.
             </Description>
-            <SelectChoice group="images" id="none">
+            <OptionSelectChoice group="image-alt-target" choice="none">
               No alt text.
-            </SelectChoice>
-            <SelectChoice group="images" id="alt">
+            </OptionSelectChoice>
+            <OptionSelectChoice group="image-alt-target" choice="alt">
               The alt text of the actual image, if available. Otherwise blank.
-            </SelectChoice>
-            <SelectChoice group="images" id="alt-fallback-title">
+            </OptionSelectChoice>
+            <OptionSelectChoice
+              group="image-alt-target"
+              choice="alt-fallback-title"
+            >
               The alt text of the actual image, if available. Otherwise the page
               title.
-            </SelectChoice>
-            <SelectChoice group="images" id="alt-fallback-filename">
+            </OptionSelectChoice>
+            <OptionSelectChoice
+              group="image-alt-target"
+              choice="alt-fallback-filename"
+            >
               The alt text of the actual image, if available. Otherwise the file
               name.
-            </SelectChoice>
+            </OptionSelectChoice>
             <SelectChoice group="images" id="title">
               The title of the page the image is on.
             </SelectChoice>
@@ -254,12 +309,12 @@ function Page() {
             The action button is the extension icon in the top navigation bar.
           </Description>
           <Select label="What should clicking the action button do?">
-            <SelectChoice group="action" id="popup">
-              Show a popup with the markdown link
-            </SelectChoice>
-            <SelectChoice group="action" id="copy">
-              Copy the markdown link to clipboard
-            </SelectChoice>
+            <OptionSelectChoice group="action-button" choice="popup">
+              Show a popup, allowing you to edit and copy the link.
+            </OptionSelectChoice>
+            <OptionSelectChoice group="action-button" choice="copy">
+              Copy the markdown link to clipboard, without showing a popup.
+            </OptionSelectChoice>
           </Select>
         </Section>
       </div>
